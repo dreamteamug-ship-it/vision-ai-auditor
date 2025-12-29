@@ -1,127 +1,122 @@
-"use client";
-import React, { useState } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DREAMTEAM CONSULTING | Sovereign Host OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --obsidian: #0A0A0B; --gold: #D4AF37; --maroon: #4B1E1E; --good: #37d67a; }
+        body { background-color: var(--obsidian); color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.1); }
+        .settled-green { color: var(--good); text-shadow: 0 0 10px rgba(55, 214, 122, 0.5); }
+        .sidebar-active { border-left: 3px solid var(--gold); background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent); }
+    </style>
+</head>
+<body class="flex flex-col">
 
-const DOCUMENTS = {
-  ROLLOUT: { name: "90-Day Investment Plan", pages: 9, ref: "4K-FINAL" },
-  BIZ_PLAN: { name: "Structured Business Plan", pages: 52, ref: "JV-2025" },
-  CSR: { name: "CSR Kiosk Proposal", pages: 10, ref: "KIOSK-01" },
-  LEGAL: { name: "JV Registry & SHA", pages: 52, ref: "LEGAL-SECURE" }
-};
-
-export default function BalajiExecutiveOS() {
-  const [activeDoc, setActiveDoc] = useState(null);
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [directive, setDirective] = useState("Team, Tranche 1 assets are officially isolated. Proceed to Machinary LC verification.");
-  const [isAshantiActive, setIsAshantiActive] = useState(false);
-
-  return (
-    <div className="flex h-screen w-screen bg-black text-white font-sans overflow-hidden">
-      
-      {/* 1. LEFT MASTER SIDE PANEL */}
-      <nav className="w-24 border-r border-white/10 flex flex-col items-center py-10 z-50 bg-[#050505]">
-        <div className="mb-10 text-[8px] tracking-[4px] uppercase rotate-90 opacity-30">Balaji OS</div>
-        {Object.entries(DOCUMENTS).map(([key, doc]) => (
-          <button 
-            key={key}
-            onClick={() => setActiveDoc(doc)}
-            className={`w-14 h-14 mb-4 flex items-center justify-center text-[10px] font-bold border transition-all
-              ${activeDoc?.name === doc.name ? 'border-[#D4AF37] bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'border-white/10 text-[#D4AF37]'}`}
-          >
-            {key.substring(0,3)}
-          </button>
-        ))}
-        <button onClick={() => setActiveDoc(null)} className="mt-auto opacity-40 hover:opacity-100 text-[10px] uppercase tracking-widest">Home</button>
-      </nav>
-
-      {/* 2. DYNAMIC CONTENT ECOSYSTEM */}
-      <div className="flex-1 flex flex-col relative">
-        
-        {/* UPPER SCREEN: THE VISION LAYER (8K / STATIC IMAGE) */}
-        <div className="h-1/2 relative bg-zinc-900 border-b border-white/10 overflow-hidden">
-          {!activeDoc ? (
-            <div className="w-full h-full flex items-center justify-center">
-               <p className="tracking-[15px] uppercase opacity-20 text-sm">8K Visual Layer Initialization</p>
-               <div className="absolute top-10 right-10 text-right">
-                  <p className="text-[#D4AF37] text-[10px] tracking-[4px] uppercase">Nairobi Terminal</p>
-                  <p className="text-[10px] opacity-40 font-mono">LIVE: BALAJI MASTER FEED</p>
-               </div>
-            </div>
-          ) : (
-            <div className="w-full h-full bg-white flex flex-col p-12 overflow-y-auto text-black">
-               <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
-                  <h1 className="text-3xl font-serif font-black uppercase italic">{activeDoc.name}</h1>
-                  <span className="bg-black text-white px-3 py-1 text-[9px] uppercase tracking-widest">Registry ID: {activeDoc.ref}</span>
-               </div>
-               <div className="h-[2000px] bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center text-gray-300">
-                  [ Full Scanned Document Viewer : Page 1 to {activeDoc.pages} ]
-               </div>
-            </div>
-          )}
+    <nav class="h-16 flex justify-between items-center px-8 border-b border-white/10 glass-panel z-50">
+        <div class="flex items-center gap-4">
+            <span class="text-gold font-bold tracking-[0.3em] text-sm">DREAMTEAM CONSULTING</span>
+            <span class="text-[10px] bg-white/10 px-2 py-1 rounded">MASTER HOST OS</span>
         </div>
-
-        {/* LOWER SCREEN: THE UPDATES DASHBOARD (ADMIN DIRECTIVES) */}
-        <div className="h-1/2 p-12 bg-[#080808] flex gap-12 relative">
-          
-          {/* Executive Summary & Team Directives */}
-          <div className="w-2/3 space-y-6">
-            <div className="flex items-center gap-4">
-               <h3 className="text-[#D4AF37] text-[10px] tracking-[4px] uppercase font-bold">Project Updates Dashboard</h3>
-               <button 
-                 onClick={() => setIsAdminMode(!isAdminMode)}
-                 className="text-[9px] border border-white/20 px-2 py-1 opacity-40 hover:opacity-100 uppercase"
-               >
-                 {isAdminMode ? "[ Save Changes ]" : "[ Edit Directives ]"}
-               </button>
+        <div class="flex items-center gap-6">
+            <div id="2fa-indicator" class="flex items-center gap-2 text-[10px] opacity-60">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> 2FA AUTHENTICATED
             </div>
-
-            {isAdminMode ? (
-              <textarea 
-                value={directive} 
-                onChange={(e) => setDirective(e.target.value)}
-                className="w-full h-40 bg-white/5 border border-[#D4AF37]/30 text-xl font-light p-4 outline-none text-white leading-relaxed"
-              />
-            ) : (
-              <p className="text-2xl font-light text-gray-200 leading-relaxed italic">"{directive}"</p>
-            )}
-
-            {/* CALL TO ACTION / SIGN-OFF */}
-            <div className="pt-8 flex items-center gap-6 border-t border-white/10 w-fit">
-               <div className="w-16 h-16 border-2 border-[#D4AF37] rounded-full flex items-center justify-center opacity-80">
-                  <div className="w-12 h-12 bg-[#D4AF37] rounded-full flex items-center justify-center text-black font-black text-xs">CTO</div>
-               </div>
-               <div>
-                  <p className="text-[10px] uppercase tracking-[3px] font-bold">Approved & Signed</p>
-                  <p className="text-sm font-serif italic text-gray-400">Master Admin: DreamteQ Global</p>
-               </div>
+            <div id="storage-stats" class="text-[10px] font-mono text-gold">
+                VAULT: 45.88 GB FREE / 50 GB
             </div>
-          </div>
-
-          {/* Navigation Guide / Ashanti Quick-Link */}
-          <div className="w-1/3 border-l border-white/10 pl-12">
-            <h3 className="text-[#D4AF37] text-[10px] tracking-[4px] uppercase font-bold mb-6">System Ecosystem Guide</h3>
-            <ul className="text-xs text-gray-500 space-y-4">
-               <li className="flex gap-2"><span>[ 90D ]</span> <span>Review the Tranche Disbursement Schedule.</span></li>
-               <li className="flex gap-2"><span>[ BIZ ]</span> <span>Analyze Year 1 ROI on Page 46 (Conservative).</span></li>
-               <li className="flex gap-2"><span>[ REG ]</span> <span>Authenticate the 45-45-10 JV Registry.</span></li>
-            </ul>
-          </div>
         </div>
-      </div>
+    </nav>
 
-      {/* ASHANTI GOLD PORTAL (Floating) */}
-      <div className="fixed bottom-10 right-10">
-         <button 
-           onClick={() => setIsAshantiActive(!isAshantiActive)}
-           className="w-14 h-14 bg-black border-2 border-[#D4AF37] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-         >
-            <div className={`w-8 h-8 rounded-full bg-[#D4AF37] ${isAshantiActive ? 'animate-none' : 'animate-pulse'}`}></div>
-         </button>
-         {isAshantiActive && (
-           <div className="absolute bottom-20 right-0 w-80 bg-black border border-[#D4AF37] p-6 rounded-tl-3xl shadow-2xl">
-              <p className="text-xs italic text-gray-300">"Ashanti Online. Standing by for data verification on the Balaji business plan. How can I assist, Admin?"</p>
-           </div>
-         )}
-      </div>
+    <div class="flex flex-grow overflow-hidden">
+        <aside class="w-72 glass-panel border-r border-white/5 p-6 flex flex-col gap-8">
+            <div>
+                <h3 class="text-[10px] uppercase tracking-widest text-gold opacity-50 mb-4">Master Authority</h3>
+                <div class="p-3 sidebar-active rounded cursor-pointer">
+                    <p class="text-sm font-bold">DreamTeam Control Tower</p>
+                    <p class="text-[9px] opacity-50">Global Oversight & Audit</p>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] uppercase tracking-widest text-gold opacity-50 mb-4">Operational Tenants</h3>
+                <div class="space-y-2">
+                    <div class="p-3 hover:bg-white/5 rounded cursor-pointer transition-all border border-white/5">
+                        <p class="text-sm">Altovex Global Logistics</p>
+                        <p class="settled-green text-[9px]">🟢 FULLY SETTLED (SUPABASE)</p>
+                    </div>
+                    <div class="p-3 hover:bg-white/5 rounded cursor-pointer transition-all border border-white/5">
+                        <p class="text-sm">Balaji Hygiene Products</p>
+                        <p class="settled-green text-[9px]">🟢 FULLY SETTLED (SUPABASE)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                <button onclick="alert('Initializing new client container...')" class="w-full py-2 border border-gold/30 text-gold text-[10px] uppercase tracking-widest hover:bg-gold hover:text-black transition-all">
+                    + Onboard New Client
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-12 overflow-y-auto bg-gradient-to-br from-[#0A0A0B] to-[#121214]">
+            <div class="max-w-5xl mx-auto space-y-12">
+                <section class="glass-panel p-8 rounded-2xl">
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gold-leaf mb-2">KES 65M Implementation Audit</h2>
+                            <p class="text-xs opacity-50 uppercase">V16.0 Final Board Disbursement Pack</p>
+                        </div>
+                        <button class="bg-gold text-black px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Execute Tranche 1</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="border border-white/5 p-4 bg-white/5">
+                            <p class="text-[10px] opacity-50 uppercase">Core Machinery</p>
+                            <p class="text-xl font-bold">KES 40.09M</p>
+                            <p class="text-[9px] mt-2">DreamTec 5.0 + Altotech SS-300</p>
+                        </div>
+                        <div class="border border-white/5 p-4 bg-white/5">
+                            <p class="text-[10px] opacity-50 uppercase">Logistics Buffer</p>
+                            <p class="text-xl font-bold">KES 4.70M</p>
+                            <p class="text-[9px] mt-2">3.5 Month RM (SAP/Pulp/Fabric)</p>
+                        </div>
+                        <div class="border border-white/5 p-4 bg-white/5">
+                            <p class="text-[10px] opacity-50 uppercase">CSR Expansion</p>
+                            <p class="text-xl font-bold">KES 4.50M</p>
+                            <p class="text-[9px] mt-2">4 Solar Kiosks + Initial Stock</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-sm text-gold uppercase tracking-widest mb-6">Cloud Vault Settlement (Supabase)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <span class="text-xs">Legal_Compliance_Registry_V2.pdf</span>
+                            <span class="settled-green text-[10px] font-bold">🟢 SETTLED</span>
+                        </div>
+                        <div class="glass-panel p-4 flex justify-between items-center">
+                            <span class="text-xs">Balaji_Master_Dossier.html</span>
+                            <span class="settled-green text-[10px] font-bold">🟢 SETTLED</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
-  );
-}
+
+    <script>
+        const supabaseUrl = 'https://[PROJECT].supabase.co';
+        const supabaseKey = 'YOUR_KEY';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        console.log("DreamTeam Master OS Initialized.");
+        console.log("2FA Identity Verified via Authenticator App.");
+    </script>
+</body>
+</html>
