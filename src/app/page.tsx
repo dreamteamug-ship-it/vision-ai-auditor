@@ -1,126 +1,133 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
-export default function Page() {
-  const [results, setResults] = useState([]);
-  const [isWorking, setIsWorking] = useState(false);
+export default function VisionAIWorkspace() {
+  const [sidebarFiles, setSidebarFiles] = useState<{name: string, type: string}[]>([]);
+  const [isAdmin, setIsAdmin] = useState(true); // Toggle for Admin/Viewer mode
+  const [stamps, setStamps] = useState<{ x: number, y: number }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function uploadFiles(e) {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
-    setIsWorking(true);
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append('files', selectedFiles[i]);
+  // 1. Handle Sidebar Uploads (Left Panel)
+  const handleSidebarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const newFiles = files.map(f => ({ name: f.name, type: f.type }));
+      setSidebarFiles(prev => [...prev, ...newFiles]);
     }
-    try {
-      const resp = await fetch('http://localhost:5000/analyze', { method: 'POST', body: formData });
-      const data = await resp.json();
-      setResults(data.results || []);
-    } catch (err) {
-      alert("ERP System offline.");
-    } finally {
-      setIsWorking(false);
-    }
-  }
+  };
 
-  const handlePrint = () => { window.print(); };
-
-  const totalFiles = results.length;
-  const avgMatch = totalFiles > 0 
-    ? Math.round(results.reduce((acc, curr) => acc + parseInt(curr.match), 0) / totalFiles) 
-    : 0;
-  const reviewCount = results.filter(r => r.status.includes('REVIEW')).length;
+  // 2. Digital Stamp Logic
+  const addStamp = (e: React.MouseEvent) => {
+    if (!isAdmin) return; // Only admins or designated signers can stamp
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setStamps([...stamps, { x, y }]);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#E5E4E2', fontFamily: 'Georgia, serif', color: '#333' }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#121212', color: '#e0e0e0', fontFamily: "'Inter', sans-serif" }}>
       
-      {/* Executive Navigation */}
-      <nav className="no-print" style={{ 
-        background: '#800000', padding: '1.5rem 3rem', color: '#D4AF37', 
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderBottom: '4px solid #D4AF37', boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
-      }}>
-        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '2px' }}>
-          VisionAI <span style={{ color: '#E5E4E2' }}>Auditor</span>
-        </div>
-        <button onClick={handlePrint} style={{ 
-          background: '#D4AF37', color: '#800000', border: 'none', padding: '10px 25px', 
-          fontWeight: 'bold', cursor: 'pointer', borderRadius: '2px', boxShadow: '2px 2px 0px #000'
-        }}>
-          GENERATE CERTIFIED REPORT
-        </button>
-      </nav>
-
-      <main style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 30px' }}>
+      {/* --- LEFT SIDEBAR: FILE LIBRARY --- */}
+      <aside className="no-print" style={{ width: '320px', borderRight: '1px solid #333', padding: '24px', display: 'flex', flexDirection: 'column', background: '#1a1a1a' }}>
+        <h2 style={{ color: '#D4AF37', fontSize: '14px', letterSpacing: '2px', marginBottom: '20px', fontWeight: 'bold' }}>PROCURMENT ASSETS</h2>
         
-        {/* Print Header */}
-        <div className="print-only" style={{ display: 'none', textAlign: 'center', marginBottom: '40px' }}>
-          <h1 style={{ color: '#800000', marginBottom: '5px' }}>CERTIFIED AUDIT LEDGER</h1>
-          <p style={{ margin: 0, fontWeight: 'bold' }}>RAW MATERIAL ALLOCATION & BUDGET RECONCILIATION</p>
-          <hr style={{ border: '1px solid #D4AF37', marginTop: '20px' }} />
+        <div style={{ border: '2px dashed #444', padding: '20px', textAlign: 'center', marginBottom: '20px', borderRadius: '12px', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
+          <p style={{ fontSize: '12px', color: '#aaa' }}>Drag & Drop MP4, PDF, or Images</p>
+          <input type="file" multiple ref={fileInputRef} onChange={handleSidebarUpload} style={{ display: 'none' }} />
+          <button style={{ marginTop: '10px', padding: '8px 16px', background: '#333', border: '1px solid #444', color: 'white', borderRadius: '6px', cursor: 'pointer' }}>Browse</button>
         </div>
 
-        {/* Input Console */}
-        <div className="no-print" style={{ background: 'white', padding: '30px', border: '1px solid #C0C0C0', boxShadow: '8px 8px 0px #800000', marginBottom: '40px' }}>
-          <h2 style={{ color: '#800000', margin: 0 }}>Allocation Input Terminal</h2>
-          <input type="file" multiple onChange={uploadFiles} style={{ marginTop: '20px', fontWeight: 'bold' }} />
-          {isWorking && <p style={{ color: '#800000', fontWeight: 'bold' }}>RECONCILING LEDGER...</p>}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {sidebarFiles.length === 0 && <p style={{ fontSize: '12px', color: '#555', textAlign: 'center' }}>No files uploaded yet</p>}
+          {sidebarFiles.map((file, i) => (
+            <div key={i} style={{ padding: '12px', background: '#252525', marginBottom: '8px', borderRadius: '8px', fontSize: '12px', display: 'flex', alignItems: 'center', border: '1px solid #333' }}>
+              <span style={{ marginRight: '10px' }}>{file.type.includes('video') ? '🎥' : file.type.includes('pdf') ? '📄' : '🖼️'}</span>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+            </div>
+          ))}
         </div>
 
-        {results.length > 0 && (
-          <>
-            <div style={{ background: 'white', border: '2px solid #800000', boxShadow: '8px 8px 0px #C0C0C0', marginBottom: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#C0C0C0', color: '#800000' }}>
-                    <th style={{ padding: '15px', textAlign: 'left', border: '1px solid #800000' }}>DOCUMENT REFERENCE</th>
-                    <th style={{ padding: '15px', textAlign: 'left', border: '1px solid #800000' }}>AUDIT STATUS</th>
-                    <th style={{ padding: '15px', textAlign: 'left', border: '1px solid #800000' }}>CONFIDENCE</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((row, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #C0C0C0' }}>
-                      <td style={{ padding: '12px', fontWeight: 'bold', borderRight: '1px solid #C0C0C0' }}>{row.filename}</td>
-                      <td style={{ padding: '12px', borderRight: '1px solid #C0C0C0', color: row.status.includes('✅') ? '#166534' : '#800000', fontWeight: 'bold' }}>{row.status}</td>
-                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{row.match}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div style={{ paddingTop: '20px', borderTop: '1px solid #333', fontSize: '11px', color: '#666' }}>
+          Logged in as: <span style={{ color: '#D4AF37' }}>{isAdmin ? 'ADMIN' : 'COLLEAGUE'}</span>
+        </div>
+      </aside>
+
+      {/* --- RIGHT DASHBOARD: INTERACTIVE DOCUMENT --- */}
+      <main style={{ flex: 1, background: '#2a2a2a', overflowY: 'auto', padding: '40px' }}>
+        
+        {/* TOP CONTROL BAR */}
+        <div className="no-print" style={{ maxWidth: '850px', margin: '0 auto 20px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#800000', padding: '12px 24px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '13px' }}>BALAJI WORKSPACE</span>
+            {isAdmin && <span style={{ background: '#D4AF37', color: 'black', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: '900' }}>EDIT ENABLED</span>}
+          </div>
+          <button onClick={() => window.print()} style={{ background: 'white', color: '#800000', border: 'none', padding: '8px 20px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>PRINT & SIGN COPY</button>
+        </div>
+
+        {/* THE DOCUMENT PAGE */}
+        <div 
+          onClick={addStamp}
+          style={{ 
+            background: '#f5e27a', 
+            width: '800px', 
+            margin: '0 auto', 
+            padding: '80px', 
+            boxShadow: '0 0 60px rgba(0,0,0,0.5)',
+            minHeight: '1123px',
+            color: 'black',
+            position: 'relative',
+            cursor: isAdmin ? 'crosshair' : 'default'
+          }}
+        >
+          {/* Stamps Layer */}
+          {stamps.map((s, i) => (
+            <div key={i} style={{ position: 'absolute', left: s.x - 40, top: s.y - 40, width: '100px', height: '100px', border: '4px solid rgba(255,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,0,0,0.6)', fontWeight: '900', transform: 'rotate(-20deg)', pointerEvents: 'none', fontSize: '12px', textAlign: 'center' }}>
+              APPROVED<br/>BALAJI AI
+            </div>
+          ))}
+
+          <h1 style={{ textAlign: 'center', color: '#800000', fontSize: '52px', fontWeight: '900', marginBottom: '10px' }}>Balaji Hygiene Products</h1>
+          <p style={{ textAlign: 'center', fontSize: '18px', letterSpacing: '4px', color: '#333', textTransform: 'uppercase', marginBottom: '60px' }}>Ultra-Luxury Rollout Plan</p>
+          
+          <div style={{ height: '4px', background: '#800000', width: '100px', margin: '0 auto 40px auto' }}></div>
+
+          <div contentEditable={isAdmin} suppressContentEditableWarning={true} style={{ outline: 'none' }}>
+            <h3 style={{ color: '#800000', borderBottom: '2px solid #800000', paddingBottom: '5px' }}>Executive Summary</h3>
+            <p style={{ lineHeight: '1.6', fontSize: '15px' }}>
+              This comprehensive 120-day Phase 1 rollout and 1-year Phase 2 MVP implementation plan details every activity, responsible party, and compliance requirement...
+            </p>
+
+            <div style={{ margin: '30px 0', padding: '20px', border: '2px solid #800000', background: 'rgba(255,255,255,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+              <p style={{ fontStyle: 'italic', color: '#800000' }}>[Admin: Drag an image here or type /ai to generate]</p>
             </div>
 
-            {/* Executive Summary */}
-            <div style={{ 
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', 
-              background: '#800000', color: '#D4AF37', padding: '20px', border: '2px solid #D4AF37' 
-            }}>
-              <div style={{ textAlign: 'center' }}>TOTAL DOCUMENTS: {totalFiles}</div>
-              <div style={{ textAlign: 'center', borderLeft: '1px solid #D4AF37', borderRight: '1px solid #D4AF37' }}>AVG ACCURACY: {avgMatch}%</div>
-              <div style={{ textAlign: 'center' }}>REVIEWS REQUIRED: {reviewCount}</div>
-            </div>
+            <h3 style={{ color: '#800000', borderBottom: '2px solid #800000', paddingBottom: '5px', marginTop: '40px' }}>Operational Milestones</h3>
+            <ul style={{ lineHeight: '2' }}>
+              <li><strong>Secure initial deposit reserve:</strong> Day 0-10</li>
+              <li><strong>Machinery placement (Altovex):</strong> Day 10-30</li>
+              <li><strong>Factory fit-out Nairobi:</strong> Day 31-60</li>
+            </ul>
+          </div>
 
-            {/* Signature Section */}
-            <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              <div style={{ borderTop: '2px solid #333', width: '250px', textAlign: 'center', paddingTop: '10px' }}>
-                <p style={{ fontSize: '0.8rem', margin: 0 }}>Chief Auditor Signature</p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '0.8rem', margin: 0, fontStyle: 'italic' }}>System Authenticated: {new Date().toLocaleString()}</p>
-                <p style={{ fontSize: '0.8rem', margin: 0, fontWeight: 'bold', color: '#800000' }}>VERIFIED BY VISIONAI BATCH PROCESSOR</p>
-              </div>
+          {/* Footer Signature Area */}
+          <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div style={{ width: '200px', borderTop: '1px solid black', textAlign: 'center', paddingTop: '10px', fontSize: '12px' }}>
+              CHIEF AUDITOR
             </div>
-          </>
-        )}
+            <div style={{ width: '200px', borderTop: '1px solid black', textAlign: 'center', paddingTop: '10px', fontSize: '12px' }}>
+              COLLEAGUE SIGNATURE
+            </div>
+          </div>
+        </div>
       </main>
 
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          .print-only { display: block !important; }
           body { background: white !important; }
-          main { margin: 0 !important; max-width: 100% !important; padding: 0 !important; }
+          main { padding: 0 !important; background: white !important; }
+          div { box-shadow: none !important; }
         }
       `}</style>
     </div>
