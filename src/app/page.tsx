@@ -1,114 +1,84 @@
 "use client";
 import React, { useState, useRef } from 'react';
 
-export default function DreamTeamProPortal() {
+export default function DreamTeamFinalPortal() {
   const [activeDoc, setActiveDoc] = useState<any>(null);
   const [activeAnnex, setActiveAnnex] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(true);
-  const [upperImage, setUpperImage] = useState(null);
+  const [upperImage, setUpperImage] = useState<string | null>(null);
   const [sidebarFiles, setSidebarFiles] = useState([
-    { id: 1, name: "120-Day Phase 1 Rollout.pdf", content: "Executive Audit Content...", annexures: [{ title: "Bank LC Documents", body: "LC Details here..." }] },
-    { id: 2, name: "Machinery Fit-out Nairobi.pdf", content: "Technical Specs...", annexures: [] }
+    { 
+        id: 1, 
+        name: "120-Day Phase 1 Rollout.pdf", 
+        content: "This document serves as the primary strategic roadmap for the Balaji Hygiene Products Nairobi facility. All procurement and machinery installations are verified against the 120-day timeline. Compliance is mandatory for all regional stakeholders.", 
+        annexures: [{ title: "Bank LC Documents", body: "Standard Chartered LC Approval #9982-A. Funds secured at 30% reserve." }] 
+    },
+    { 
+        id: 2, 
+        name: "Machinery Fit-out Nairobi.pdf", 
+        content: "Technical specifications for the Sassy Pad production line have been audited. Installation scheduled for Day 90. Electrical and safety standards are fully met.", 
+        annexures: [] 
+    }
   ]);
 
-  // 1. Image Upload & AI Enhancement Simulation
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        // Here we simulate 4K Upscaling/Enhancement
-        setUpperImage(event.target?.result as any);
-        alert("AI Enhancement Engine: Image upscaled to 4K resolution.");
+        setUpperImage(event.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0a', color: '#e0e0e0', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: '#0a0a0a', color: '#e0e0e0', overflow: 'hidden' }}>
       
-      {/* --- SIDEBAR --- */}
-      <aside className="no-print" style={{ width: '320px', background: '#1a0000', borderRight: '1px solid #D4AF37', padding: '24px', zIndex: 10 }}>
+      {/* --- SIDEBAR (Fixed Width) --- */}
+      <aside className="no-print" style={{ width: '320px', background: '#1a0000', borderRight: '1px solid #D4AF37', padding: '24px', z_index: 10, flexShrink: 0 }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{ color: '#D4AF37', fontSize: '28px', border: '2px solid #D4AF37', borderRadius: '50%', width: '60px', height: '60px', lineHeight: '60px', margin: '0 auto' }}>DT</div>
-          <h2 style={{ fontSize: '10px', color: '#D4AF37', marginTop: '10px', letterSpacing: '3px' }}>DREAMTEAM CONSULTING</h2>
+          <div style={{ color: '#D4AF37', fontSize: '28px', border: '2px solid #D4AF37', borderRadius: '50%', width: '60px', height: '60px', lineHeight: '60px', margin: '0 auto', fontWeight: 'bold' }}>DT</div>
+          <h2 style={{ fontSize: '10px', color: '#D4AF37', marginTop: '15px', letterSpacing: '3px' }}>DREAMTEAM CONSULTING</h2>
         </div>
 
-        <div style={{ marginBottom: '30px' }}>
-          <label style={{ color: '#D4AF37', fontSize: '11px', cursor: 'pointer', border: '1px solid #D4AF37', padding: '8px', display: 'block', textAlign: 'center' }}>
-            UPLOAD & ENHANCE IMAGE
-            <input type="file" onChange={handleImageUpload} style={{ display: 'none' }} />
-          </label>
-        </div>
+        <label style={{ color: '#D4AF37', fontSize: '11px', cursor: 'pointer', border: '1px solid #D4AF37', padding: '12px', display: 'block', textAlign: 'center', marginBottom: '30px', transition: '0.3s' }}>
+          UPLOAD & 4K ENHANCE
+          <input type="file" onChange={handleImageUpload} style={{ display: 'none' }} />
+        </label>
 
-        <p style={{ fontSize: '11px', color: '#888', marginBottom: '15px' }}>OFFICIAL DOCUMENTS</p>
+        <p style={{ fontSize: '11px', color: '#888', marginBottom: '15px', letterSpacing: '1px' }}>ACTIVE AUDITS</p>
         {sidebarFiles.map((doc) => (
           <div 
             key={doc.id} 
             onClick={() => setActiveDoc(doc)}
-            style={{ padding: '12px', background: '#2d0000', marginBottom: '10px', cursor: 'pointer', borderLeft: activeDoc?.id === doc.id ? '4px solid #D4AF37' : 'none' }}
+            style={{ padding: '15px', background: activeDoc?.id === doc.id ? '#3d0000' : '#2d0000', marginBottom: '10px', cursor: 'pointer', borderLeft: activeDoc?.id === doc.id ? '4px solid #D4AF37' : '4px solid transparent', transition: '0.2s' }}
           >
-            <span style={{ fontSize: '13px' }}>{doc.name}</span>
+            <span style={{ fontSize: '13px', fontWeight: activeDoc?.id === doc.id ? 'bold' : 'normal' }}>{doc.name}</span>
           </div>
         ))}
       </aside>
 
-      {/* --- MAIN STAGE --- */}
-      <main style={{ flex: 1, position: 'relative', background: '#800000' }}>
+      {/* --- MAIN DASHBOARD AREA --- */}
+      <main style={{ flex: 1, position: 'relative', background: '#800000', display: 'flex', flexDirection: 'column' }}>
         
-        {/* LANDING PAGE (Always in background) */}
-        <div style={{ height: '100vh', width: '100%', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, background: upperImage ? `url(${upperImage})` : '#000', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.6 }}></div>
-          <div style={{ padding: '60px', textAlign: 'center', color: '#D4AF37' }}>
-            <h1 style={{ fontSize: '4rem', margin: 0 }}>DREAMTEAM</h1>
-            <p style={{ fontStyle: 'italic' }}>Strategic Operational Intelligence</p>
+        {/* UPPER DASHBOARD: Image Container */}
+        <div style={{ height: '50%', width: '100%', background: '#000', position: 'relative', overflow: 'hidden', borderBottom: '4px solid #D4AF37' }}>
+          {upperImage ? (
+            <img src={upperImage} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Sassy Pad Upper" />
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#333' }}>[ 4K BACKGROUND RESERVED ]</div>
+          )}
+          <div style={{ position: 'absolute', bottom: '20px', left: '30px', color: '#D4AF37', textShadow: '2px 2px 4px black' }}>
+            <h1 style={{ fontSize: '3rem', margin: 0, fontWeight: 'bold' }}>DREAMTEAM</h1>
           </div>
         </div>
 
-        {/* OVERLAPPING DOCUMENT MODAL */}
-        {activeDoc && (
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', overflowY: 'auto', padding: '40px', zIndex: 20 }}>
-            <div style={{ position: 'relative', width: '794px', height: '1123px', background: 'white', color: 'black', padding: '80px', boxShadow: '0 0 50px black' }}>
-              <button onClick={() => setActiveDoc(null)} style={{ position: 'absolute', top: 20, right: 20, background: '#800000', color: 'white', border: 'none', padding: '5px 15px', cursor: 'pointer' }}>CLOSE</button>
-              
-              <h2 style={{ color: '#800000', borderBottom: '2px solid #800000' }}>{activeDoc.name}</h2>
-              <p style={{ marginTop: '30px', lineHeight: '2' }}>{activeDoc.content}</p>
-
-              {activeDoc.annexures.length > 0 && (
-                <div style={{ marginTop: '50px' }}>
-                  <h4 style={{ color: '#D4AF37', background: '#1a0000', padding: '10px' }}>ANNEXURES AVAILABLE</h4>
-                  {activeDoc.annexures.map((annex: any, idx: number) => (
-                    <button key={idx} onClick={() => setActiveAnnex(annex)} style={{ marginTop: '10px', display: 'block', border: '1px solid #800000', background: 'none', padding: '10px', cursor: 'pointer' }}>
-                      Open {annex.title}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p style={{ position: 'absolute', bottom: 80, left: 80 }}>Verification completed.</p>
-            </div>
-          </div>
-        )}
-
-        {/* NESTED ANNEXURE MODAL (Module within Module) */}
-        {activeAnnex && (
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(128,0,0,0.95)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 30 }}>
-            <div style={{ width: '600px', background: 'white', color: 'black', padding: '40px', borderRadius: '10px', boxShadow: '0 0 100px #D4AF37' }}>
-              <h3 style={{ color: '#800000' }}>{activeAnnex.title}</h3>
-              <p style={{ margin: '20px 0', lineHeight: '1.6' }}>{activeAnnex.body}</p>
-              <button onClick={() => setActiveAnnex(null)} style={{ background: '#800000', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>BACK TO DOCUMENT</button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          main { background: white !important; }
-          .a4-page { box-shadow: none !important; margin: 0 !important; }
-        }
-      `}</style>
-    </div>
-  );
-}
+        {/* LOWER DASHBOARD: Content & Instructions */}
+        <div style={{ height: '50%', width: '100%', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+            <p style={{ color: '#f5e27a', fontSize: '20px', fontStyle: 'italic', maxWidth: '600px', lineHeight: '1.6' }}>
+                "Operational excellence is the standard. Every document in the audit library is formatted for zero-bleed A4 output."
+            </p>
+            <div style={{ marginTop: '30px', display: 'flex', gap: '20px' }}>
+                <div style={{ padding: '15px 30px', border: '1px solid #D4AF37', color: '#D4AF37', fontSize: '12px' }}>SELECT FILE TO REVIEW</div>
+                <div style={{ padding: '15px 30px', border: '1px solid #D4AF37', color: '#D4AF37', fontSize: '12
