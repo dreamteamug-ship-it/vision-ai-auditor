@@ -1,13 +1,12 @@
 "use client";
 import React, { useState, useRef } from 'react';
 
-export default function VisionAIWorkspace() {
+export default function DreamTeamConsultingPortal() {
   const [sidebarFiles, setSidebarFiles] = useState<{name: string, type: string}[]>([]);
-  const [isAdmin, setIsAdmin] = useState(true); // Toggle for Admin/Viewer mode
+  const [isAdmin, setIsAdmin] = useState(true); 
   const [stamps, setStamps] = useState<{ x: number, y: number }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Handle Sidebar Uploads (Left Panel)
   const handleSidebarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -16,9 +15,8 @@ export default function VisionAIWorkspace() {
     }
   };
 
-  // 2. Digital Stamp Logic
   const addStamp = (e: React.MouseEvent) => {
-    if (!isAdmin) return; // Only admins or designated signers can stamp
+    if (!isAdmin) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -26,108 +24,96 @@ export default function VisionAIWorkspace() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#121212', color: '#e0e0e0', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0a', color: '#e0e0e0', fontFamily: "'Garamond', serif" }}>
       
-      {/* --- LEFT SIDEBAR: FILE LIBRARY --- */}
-      <aside className="no-print" style={{ width: '320px', borderRight: '1px solid #333', padding: '24px', display: 'flex', flexDirection: 'column', background: '#1a1a1a' }}>
-        <h2 style={{ color: '#D4AF37', fontSize: '14px', letterSpacing: '2px', marginBottom: '20px', fontWeight: 'bold' }}>PROCURMENT ASSETS</h2>
+      {/* --- SIDEBAR: ASSET LIBRARY --- */}
+      <aside className="no-print" style={{ width: '300px', borderRight: '1px solid #2d0000', padding: '24px', display: 'flex', flexDirection: 'column', background: '#1a0000' }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{ color: '#D4AF37', fontSize: '24px', fontWeight: 'bold', border: '2px solid #D4AF37', padding: '10px', display: 'inline-block', borderRadius: '50%' }}>DT</div>
+          <h3 style={{ color: '#D4AF37', fontSize: '12px', marginTop: '10px', letterSpacing: '2px' }}>DREAMTEAM ASSETS</h3>
+        </div>
         
-        <div style={{ border: '2px dashed #444', padding: '20px', textAlign: 'center', marginBottom: '20px', borderRadius: '12px', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
-          <p style={{ fontSize: '12px', color: '#aaa' }}>Drag & Drop MP4, PDF, or Images</p>
+        <div style={{ border: '1px dashed #D4AF37', padding: '15px', textAlign: 'center', marginBottom: '20px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212, 175, 55, 0.05)' }} onClick={() => fileInputRef.current?.click()}>
+          <p style={{ fontSize: '11px', color: '#D4AF37' }}>DRAG & DROP AUDIT FILES</p>
           <input type="file" multiple ref={fileInputRef} onChange={handleSidebarUpload} style={{ display: 'none' }} />
-          <button style={{ marginTop: '10px', padding: '8px 16px', background: '#333', border: '1px solid #444', color: 'white', borderRadius: '6px', cursor: 'pointer' }}>Browse</button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          {sidebarFiles.length === 0 && <p style={{ fontSize: '12px', color: '#555', textAlign: 'center' }}>No files uploaded yet</p>}
           {sidebarFiles.map((file, i) => (
-            <div key={i} style={{ padding: '12px', background: '#252525', marginBottom: '8px', borderRadius: '8px', fontSize: '12px', display: 'flex', alignItems: 'center', border: '1px solid #333' }}>
-              <span style={{ marginRight: '10px' }}>{file.type.includes('video') ? '🎥' : file.type.includes('pdf') ? '📄' : '🖼️'}</span>
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+            <div key={i} style={{ padding: '10px', background: '#2d0000', marginBottom: '8px', borderRadius: '4px', fontSize: '12px', borderLeft: '3px solid #D4AF37' }}>
+              {file.name}
             </div>
           ))}
-        </div>
-
-        <div style={{ paddingTop: '20px', borderTop: '1px solid #333', fontSize: '11px', color: '#666' }}>
-          Logged in as: <span style={{ color: '#D4AF37' }}>{isAdmin ? 'ADMIN' : 'COLLEAGUE'}</span>
         </div>
       </aside>
 
-      {/* --- RIGHT DASHBOARD: INTERACTIVE DOCUMENT --- */}
-      <main style={{ flex: 1, background: '#2a2a2a', overflowY: 'auto', padding: '40px' }}>
+      {/* --- MAIN STAGE --- */}
+      <main style={{ flex: 1, overflowY: 'auto', padding: '0', background: '#f4f4f4' }}>
         
-        {/* TOP CONTROL BAR */}
-        <div className="no-print" style={{ maxWidth: '850px', margin: '0 auto 20px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#800000', padding: '12px 24px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <span style={{ fontWeight: 'bold', fontSize: '13px' }}>BALAJI WORKSPACE</span>
-            {isAdmin && <span style={{ background: '#D4AF37', color: 'black', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: '900' }}>EDIT ENABLED</span>}
-          </div>
-          <button onClick={() => window.print()} style={{ background: 'white', color: '#800000', border: 'none', padding: '8px 20px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>PRINT & SIGN COPY</button>
-        </div>
-
-        {/* THE DOCUMENT PAGE */}
-        <div 
-          onClick={addStamp}
-          style={{ 
-            background: '#f5e27a', 
-            width: '800px', 
-            margin: '0 auto', 
-            padding: '80px', 
-            boxShadow: '0 0 60px rgba(0,0,0,0.5)',
-            minHeight: '1123px',
-            color: 'black',
-            position: 'relative',
-            cursor: isAdmin ? 'crosshair' : 'default'
-          }}
-        >
-          {/* Stamps Layer */}
-          {stamps.map((s, i) => (
-            <div key={i} style={{ position: 'absolute', left: s.x - 40, top: s.y - 40, width: '100px', height: '100px', border: '4px solid rgba(255,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,0,0,0.6)', fontWeight: '900', transform: 'rotate(-20deg)', pointerEvents: 'none', fontSize: '12px', textAlign: 'center' }}>
-              APPROVED<br/>BALAJI AI
-            </div>
-          ))}
-
-          <h1 style={{ textAlign: 'center', color: '#800000', fontSize: '52px', fontWeight: '900', marginBottom: '10px' }}>Balaji Hygiene Products</h1>
-          <p style={{ textAlign: 'center', fontSize: '18px', letterSpacing: '4px', color: '#333', textTransform: 'uppercase', marginBottom: '60px' }}>Ultra-Luxury Rollout Plan</p>
+        {/* LANDING / COVER PAGE */}
+        <section style={{ height: '100vh', background: '#800000', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#D4AF37', textAlign: 'center', borderBottom: '10px solid #D4AF37' }} className="no-print">
+          <div style={{ fontSize: '100px', fontWeight: 'bold', marginBottom: '10px', textShadow: '3px 3px 0px #4b0000' }}>DT</div>
+          <h1 style={{ fontSize: '48px', letterSpacing: '8px', textTransform: 'uppercase' }}>DreamTeam Consulting</h1>
+          <div style={{ width: '200px', height: '2px', background: '#D4AF37', margin: '20px auto' }}></div>
+          <p style={{ maxWidth: '600px', fontSize: '18px', color: '#f5e27a', lineHeight: '1.6', fontStyle: 'italic' }}>
+            "Excellence in Strategic Auditing & Operational Precision"
+          </p>
           
-          <div style={{ height: '4px', background: '#800000', width: '100px', margin: '0 auto 40px auto' }}></div>
-
-          <div contentEditable={isAdmin} suppressContentEditableWarning={true} style={{ outline: 'none' }}>
-            <h3 style={{ color: '#800000', borderBottom: '2px solid #800000', paddingBottom: '5px' }}>Executive Summary</h3>
-            <p style={{ lineHeight: '1.6', fontSize: '15px' }}>
-              This comprehensive 120-day Phase 1 rollout and 1-year Phase 2 MVP implementation plan details every activity, responsible party, and compliance requirement...
-            </p>
-
-            <div style={{ margin: '30px 0', padding: '20px', border: '2px solid #800000', background: 'rgba(255,255,255,0.3)', borderRadius: '8px', textAlign: 'center' }}>
-              <p style={{ fontStyle: 'italic', color: '#800000' }}>[Admin: Drag an image here or type /ai to generate]</p>
-            </div>
-
-            <h3 style={{ color: '#800000', borderBottom: '2px solid #800000', paddingBottom: '5px', marginTop: '40px' }}>Operational Milestones</h3>
-            <ul style={{ lineHeight: '2' }}>
-              <li><strong>Secure initial deposit reserve:</strong> Day 0-10</li>
-              <li><strong>Machinery placement (Altovex):</strong> Day 10-30</li>
-              <li><strong>Factory fit-out Nairobi:</strong> Day 31-60</li>
+          <div style={{ marginTop: '50px', background: 'rgba(0,0,0,0.2)', padding: '30px', borderRadius: '15px', border: '1px solid #D4AF37' }}>
+            <h4 style={{ marginBottom: '15px' }}>TEAM INSTRUCTIONS</h4>
+            <ul style={{ textAlign: 'left', fontSize: '14px', color: 'white', listStyle: 'square' }}>
+              <li>Interact with documents in the sidebar.</li>
+              <li>Click to apply "APPROVED" stamp (Admin Only).</li>
+              <li>Save to PDF or Print for physical records.</li>
+              <li>Request Admin for any data modifications.</li>
             </ul>
           </div>
+        </section>
 
-          {/* Footer Signature Area */}
-          <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <div style={{ width: '200px', borderTop: '1px solid black', textAlign: 'center', paddingTop: '10px', fontSize: '12px' }}>
-              CHIEF AUDITOR
-            </div>
-            <div style={{ width: '200px', borderTop: '1px solid black', textAlign: 'center', paddingTop: '10px', fontSize: '12px' }}>
-              COLLEAGUE SIGNATURE
-            </div>
+        {/* STANDALONE A4 PAGES */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '50px 0' }}>
+          
+          {/* PAGE 1 */}
+          <div className="a4-page" onClick={addStamp} style={{ position: 'relative', width: '794px', height: '1123px', background: 'white', padding: '80px', boxShadow: '0 0 20px rgba(0,0,0,0.1)', marginBottom: '40px', color: 'black' }}>
+             {/* Stamps Layer */}
+             {stamps.map((s, i) => (
+                <div key={i} style={{ position: 'absolute', left: s.x - 50, top: s.y - 50, width: '100px', height: '100px', border: '3px solid red', borderRadius: '50%', color: 'red', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(-15deg)', pointerEvents: 'none' }}>APPROVED</div>
+             ))}
+
+             <h2 style={{ borderBottom: '2px solid #800000', color: '#800000', paddingBottom: '10px' }}>EXECUTIVE SUMMARY</h2>
+             <p style={{ fontSize: '16px', lineHeight: '1.8', marginTop: '30px' }}>
+                DreamTeam Consulting is committed to delivering ultra-high precision operational roadmaps. This document serves as the primary gateway for all project milestones and compliance checks. We invite all team members to review the attached assets in the sidebar and verify the alignment of each phase against our core strategic objectives.
+             </p>
+             <p style={{ marginTop: '20px' }}>Every page in this audit is formatted for A4 standard to ensure zero bleeding and perfect alignment.</p>
+             <div style={{ position: 'absolute', bottom: '40px', width: '100%', left: '0', textAlign: 'center', fontSize: '10px', color: '#aaa' }}>Page 1 / 2 - DT Confidential</div>
           </div>
+
+          {/* PAGE 2 */}
+          <div className="a4-page" style={{ position: 'relative', width: '794px', height: '1123px', background: 'white', padding: '80px', boxShadow: '0 0 20px rgba(0,0,0,0.1)', color: 'black' }}>
+             <h2 style={{ borderBottom: '2px solid #800000', color: '#800000', paddingBottom: '10px' }}>ADMINISTRATION RIGHTS</h2>
+             <p style={{ fontSize: '16px', lineHeight: '1.8', marginTop: '30px' }}>
+                Modification of this document is strictly reserved for the Chief Auditor. Team members may request changes via the sidebar portal. Once a page is stamped, it is considered a locked record in our Supabase architecture.
+             </p>
+             <div style={{ marginTop: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ width: '200px', borderTop: '1px solid black', paddingTop: '10px', textAlign: 'center' }}>CHIEF AUDITOR</div>
+                <div style={{ width: '200px', borderTop: '1px solid black', paddingTop: '10px', textAlign: 'center' }}>DATE</div>
+             </div>
+             <div style={{ position: 'absolute', bottom: '40px', width: '100%', left: '0', textAlign: 'center', fontSize: '10px', color: '#aaa' }}>Page 2 / 2 - DT Confidential</div>
+          </div>
+
         </div>
       </main>
 
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { background: white !important; }
           main { padding: 0 !important; background: white !important; }
-          div { box-shadow: none !important; }
+          .a4-page { 
+            margin: 0 !important; 
+            box-shadow: none !important; 
+            page-break-after: always;
+            break-after: page;
+          }
         }
       `}</style>
     </div>
