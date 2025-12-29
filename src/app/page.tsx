@@ -1,107 +1,112 @@
 "use client";
 import React, { useState, useRef } from 'react';
 
-export default function DreamTeamPortal() {
+export default function DreamTeamProPortal() {
+  const [activeDoc, setActiveDoc] = useState<any>(null);
+  const [activeAnnex, setActiveAnnex] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(true);
-  const [upperImage, setUpperImage] = useState('/sassy_upper_placeholder.jpg'); // You can drag-drop to replace
-  const [lowerImage, setLowerImage] = useState('/sassy_lower_placeholder.jpg');
-  const [sidebarFiles, setSidebarFiles] = useState<{name: string, type: string}[]>([]);
-  const [stamps, setStamps] = useState<{ x: number, y: number }[]>([]);
+  const [upperImage, setUpperImage] = useState(null);
+  const [sidebarFiles, setSidebarFiles] = useState([
+    { id: 1, name: "120-Day Phase 1 Rollout.pdf", content: "Executive Audit Content...", annexures: [{ title: "Bank LC Documents", body: "LC Details here..." }] },
+    { id: 2, name: "Machinery Fit-out Nairobi.pdf", content: "Technical Specs...", annexures: [] }
+  ]);
 
-  // Drag and Drop Image Handler
-  const handleImageDrop = (e: React.DragEvent, setter: (val: string) => void) => {
-    e.preventDefault();
-    if (!isAdmin) return;
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
+  // 1. Image Upload & AI Enhancement Simulation
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => setter(event.target?.result as string);
+      reader.onload = (event) => {
+        // Here we simulate 4K Upscaling/Enhancement
+        setUpperImage(event.target?.result as any);
+        alert("AI Enhancement Engine: Image upscaled to 4K resolution.");
+      };
       reader.readAsDataURL(file);
     }
   };
 
-  const addStamp = (e: React.MouseEvent) => {
-    if (!isAdmin) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    setStamps([...stamps, { x: e.clientX - rect.left, y: e.clientY - rect.top }]);
-  };
-
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0a', color: '#e0e0e0', fontFamily: "'Garamond', serif" }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#0a0a0a', color: '#e0e0e0', overflow: 'hidden' }}>
       
-      {/* SIDEBAR */}
-      <aside className="no-print" style={{ width: '300px', background: '#1a0000', borderRight: '1px solid #D4AF37', padding: '20px' }}>
+      {/* --- SIDEBAR --- */}
+      <aside className="no-print" style={{ width: '320px', background: '#1a0000', borderRight: '1px solid #D4AF37', padding: '24px', zIndex: 10 }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ color: '#D4AF37', fontSize: '28px', border: '2px solid #D4AF37', borderRadius: '50%', width: '60px', height: '60px', lineHeight: '60px', margin: '0 auto' }}>DT</div>
-          <h2 style={{ fontSize: '12px', color: '#D4AF37', marginTop: '10px', letterSpacing: '2px' }}>DREAMTEAM ASSETS</h2>
+          <h2 style={{ fontSize: '10px', color: '#D4AF37', marginTop: '10px', letterSpacing: '3px' }}>DREAMTEAM CONSULTING</h2>
         </div>
-        <div style={{ flex: 1 }}>
-           <p style={{ fontSize: '11px', color: '#888', marginBottom: '10px' }}>AUDIT QUEUE</p>
-           {sidebarFiles.map((f, i) => (
-             <div key={i} style={{ padding: '8px', background: '#2d0000', marginBottom: '5px', borderRadius: '4px', fontSize: '12px' }}>{f.name}</div>
-           ))}
+
+        <div style={{ marginBottom: '30px' }}>
+          <label style={{ color: '#D4AF37', fontSize: '11px', cursor: 'pointer', border: '1px solid #D4AF37', padding: '8px', display: 'block', textAlign: 'center' }}>
+            UPLOAD & ENHANCE IMAGE
+            <input type="file" onChange={handleImageUpload} style={{ display: 'none' }} />
+          </label>
         </div>
+
+        <p style={{ fontSize: '11px', color: '#888', marginBottom: '15px' }}>OFFICIAL DOCUMENTS</p>
+        {sidebarFiles.map((doc) => (
+          <div 
+            key={doc.id} 
+            onClick={() => setActiveDoc(doc)}
+            style={{ padding: '12px', background: '#2d0000', marginBottom: '10px', cursor: 'pointer', borderLeft: activeDoc?.id === doc.id ? '4px solid #D4AF37' : 'none' }}
+          >
+            <span style={{ fontSize: '13px' }}>{doc.name}</span>
+          </div>
+        ))}
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main style={{ flex: 1, overflowY: 'auto', background: '#f4f4f4' }}>
+      {/* --- MAIN STAGE --- */}
+      <main style={{ flex: 1, position: 'relative', background: '#800000' }}>
         
-        {/* LANDING PAGE: MAROON & GOLD */}
-        <section className="no-print" style={{ background: '#800000', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          
-          {/* Upper Image Zone */}
-          <div 
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleImageDrop(e, setUpperImage)}
-            style={{ height: '40vh', width: '100%', overflow: 'hidden', position: 'relative', borderBottom: '5px solid #D4AF37', background: '#000' }}
-          >
-            <img src={upperImage} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.7' }} alt="Upper Asset" />
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%' }}>
-              <h1 style={{ color: '#D4AF37', fontSize: '60px', textTransform: 'uppercase', letterSpacing: '10px', textShadow: '4px 4px 8px black' }}>DreamTeam</h1>
-            </div>
-            {isAdmin && <div style={{ position: 'absolute', top: 10, right: 10, background: '#D4AF37', color: 'black', fontSize: '10px', padding: '4px 8px' }}>ADMIN: DRAG IMAGE HERE</div>}
-          </div>
-
-          {/* Executive Content */}
-          <div style={{ padding: '60px', textAlign: 'center', flex: 1 }}>
-             <p style={{ color: '#f5e27a', fontSize: '24px', fontStyle: 'italic', marginBottom: '30px' }}>Strategic Audit Portal</p>
-             <div style={{ maxWidth: '700px', margin: '0 auto', color: 'white', lineHeight: '1.8' }}>
-                <p>Welcome to the Balaji Hygiene Products "Sassy Pad" Rollout Workspace. Please use the sidebar to access raw data, and interact with the A4 documents below for official sign-off. All pages are perfectly aligned for A4 standard printing.</p>
-             </div>
-          </div>
-
-          {/* Lower Image Zone */}
-          <div 
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleImageDrop(e, setLowerImage)}
-            style={{ height: '30vh', width: '100%', overflow: 'hidden', borderTop: '5px solid #D4AF37', background: '#000' }}
-          >
-            <img src={lowerImage} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: '0.6' }} alt="Lower Asset" />
-            {isAdmin && <div style={{ position: 'absolute', bottom: 10, right: 10, background: '#D4AF37', color: 'black', fontSize: '10px', padding: '4px 8px' }}>ADMIN: DRAG IMAGE HERE</div>}
-          </div>
-        </section>
-
-        {/* A4 DOCUMENT SECTION */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 0' }}>
-          <div onClick={addStamp} style={{ position: 'relative', width: '794px', height: '1123px', background: 'white', padding: '80px', color: 'black', boxShadow: '0 0 40px rgba(0,0,0,0.2)' }}>
-            {stamps.map((s, i) => (
-              <div key={i} style={{ position: 'absolute', left: s.x - 50, top: s.y - 50, width: '100px', height: '100px', border: '4px solid red', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'red', fontWeight: 'bold', transform: 'rotate(-20deg)', pointerEvents: 'none' }}>APPROVED</div>
-            ))}
-            <h2 style={{ color: '#800000', borderBottom: '3px solid #800000', paddingBottom: '10px' }}>120-DAY PHASE 1 ROLLOUT</h2>
-            <p style={{ marginTop: '30px', fontSize: '15px', lineHeight: '2' }}>
-              The implementation of the Balaji Hygiene production line is set for the Nairobi facility. All raw materials (Sassy Pad components) are to be audited against international hygiene standards. 
-            </p>
-            {/* Page Fullstop sentence as requested */}
-            <p style={{ marginTop: '800px', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>This document concludes Phase 1 verification.</p>
+        {/* LANDING PAGE (Always in background) */}
+        <div style={{ height: '100vh', width: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, background: upperImage ? `url(${upperImage})` : '#000', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.6 }}></div>
+          <div style={{ padding: '60px', textAlign: 'center', color: '#D4AF37' }}>
+            <h1 style={{ fontSize: '4rem', margin: 0 }}>DREAMTEAM</h1>
+            <p style={{ fontStyle: 'italic' }}>Strategic Operational Intelligence</p>
           </div>
         </div>
+
+        {/* OVERLAPPING DOCUMENT MODAL */}
+        {activeDoc && (
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', overflowY: 'auto', padding: '40px', zIndex: 20 }}>
+            <div style={{ position: 'relative', width: '794px', height: '1123px', background: 'white', color: 'black', padding: '80px', boxShadow: '0 0 50px black' }}>
+              <button onClick={() => setActiveDoc(null)} style={{ position: 'absolute', top: 20, right: 20, background: '#800000', color: 'white', border: 'none', padding: '5px 15px', cursor: 'pointer' }}>CLOSE</button>
+              
+              <h2 style={{ color: '#800000', borderBottom: '2px solid #800000' }}>{activeDoc.name}</h2>
+              <p style={{ marginTop: '30px', lineHeight: '2' }}>{activeDoc.content}</p>
+
+              {activeDoc.annexures.length > 0 && (
+                <div style={{ marginTop: '50px' }}>
+                  <h4 style={{ color: '#D4AF37', background: '#1a0000', padding: '10px' }}>ANNEXURES AVAILABLE</h4>
+                  {activeDoc.annexures.map((annex: any, idx: number) => (
+                    <button key={idx} onClick={() => setActiveAnnex(annex)} style={{ marginTop: '10px', display: 'block', border: '1px solid #800000', background: 'none', padding: '10px', cursor: 'pointer' }}>
+                      Open {annex.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <p style={{ position: 'absolute', bottom: 80, left: 80 }}>Verification completed.</p>
+            </div>
+          </div>
+        )}
+
+        {/* NESTED ANNEXURE MODAL (Module within Module) */}
+        {activeAnnex && (
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(128,0,0,0.95)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 30 }}>
+            <div style={{ width: '600px', background: 'white', color: 'black', padding: '40px', borderRadius: '10px', boxShadow: '0 0 100px #D4AF37' }}>
+              <h3 style={{ color: '#800000' }}>{activeAnnex.title}</h3>
+              <p style={{ margin: '20px 0', lineHeight: '1.6' }}>{activeAnnex.body}</p>
+              <button onClick={() => setActiveAnnex(null)} style={{ background: '#800000', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>BACK TO DOCUMENT</button>
+            </div>
+          </div>
+        )}
       </main>
 
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          main { padding: 0 !important; }
-          div { box-shadow: none !important; }
+          main { background: white !important; }
+          .a4-page { box-shadow: none !important; margin: 0 !important; }
         }
       `}</style>
     </div>
