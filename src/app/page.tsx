@@ -1,200 +1,106 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+/** * BULLETPROOF IMPORT: 
+ * We use '../lib/supabase' to tell Next.js exactly where the file is 
+ * regardless of the '@' alias settings.
+ */
+import { supabase } from '../lib/supabase';
+
+const HOUSES = {
+  BALAJI: { 
+    name: "Balaji Manufacturing", 
+    color: "#300101", 
+    tagline: "Industrial Excellence",
+    logo: "B" 
+  },
+  SINOEV: { 
+    name: "Sinoafriq EV Mobility", 
+    color: "#000814", 
+    tagline: "Sustainable Logistics",
+    logo: "S" 
+  },
+  ALTOVEX: { 
+    name: "Altovex Logistics", 
+    color: "#0A0A0A", 
+    tagline: "Global Distribution",
+    logo: "A" 
+  }
+};
 
 export default function GlobalConglomerateMaster() {
-  // --- CORE STATE ---
-  const [accessLevel, setAccessLevel] = useState<'guest' | string>('guest');
-  const [passkey, setPasskey] = useState('');
-  const [activeFile, setActiveFile] = useState<any>(null);
-  const [vaultFiles, setVaultFiles] = useState<any[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  
-  // --- ASHANTI AI STATE ---
-  const [isAshantiOpen, setIsAshantiOpen] = useState(false);
-  const [chatHistory, setChatHistory] = useState([
-    { role: 'ai', text: 'Greetings. I am Ashanti. The Ecosystem is online. I have prepared the House environments for your arrival.' }
-  ]);
-  const [userInput, setUserInput] = useState('');
-
-  // --- LUXURY HOUSE REGISTRY (THEMES & IDENTITY) ---
-  const HOUSES: any = {
-    'ADMIN99': { name: 'CENTRAL COMMAND HQ', color: '#000000', accent: '#D4AF37', secondary: '#C0C0C0' },
-    'BALAJI': { name: 'BALAJI HYGIENE PRODUCTS', color: '#300101', accent: '#D4AF37', secondary: '#F5E8C7' },
-    'SINOEV': { name: 'SINOAFRIQ EV MOBILITY', color: '#000814', accent: '#E5E4E2', secondary: '#003566' },
-    'ALTOGLOBAL': { name: 'ALTOVEX GLOBAL LOGISTICS', color: '#0A0A0A', accent: '#C0C0C0', secondary: '#333333' },
-    'URBANEDGE': { name: 'URBAN EDGE SOLUTIONS', color: '#021206', accent: '#D4AF37', secondary: '#2D6A4F' },
-    'BATTSWAP': { name: 'AFRISINO BATTERY SWAP', color: '#121212', accent: '#FFD700', secondary: '#DAA520' }
-  };
-
-  const COMPANY_KEYS: any = {
-    'ADMIN99': 'admin', 
-    'BALAJI': 'balaji', 
-    'SINOEV': 'sinoev',
-    'ALTOGLOBAL': 'altoglobal', 
-    'URBANEDGE': 'urbanedge', 
-    'BATTSWAP': 'battswap'
-  };
-
-  // Determine current active theme
-  const currentHouseKey = Object.keys(COMPANY_KEYS).find(key => COMPANY_KEYS[key] === accessLevel) || 'ADMIN99';
-  const theme = HOUSES[currentHouseKey] || HOUSES['ADMIN99'];
-
-  // --- DATABASE OPERATIONS ---
-  const fetchVault = async (key: string) => {
-    const target = key === 'admin' ? 'dtconsult' : key;
-    const { data } = await supabase.from('assets').select('*').eq('company_key', target).order('created_at', { ascending: false });
-    if (data) setVaultFiles(data);
-  };
-
-  const handleGlobalSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.length < 2) { fetchVault(accessLevel); return; }
-    let base = supabase.from('assets').select('*').ilike('name', `%${query}%`);
-    if (accessLevel !== 'admin') base = base.eq('company_key', accessLevel);
-    const { data } = await base;
-    if (data) setVaultFiles(data);
-  };
-
-  const syncToCloud = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || accessLevel === 'guest') return;
-    setIsSyncing(true);
-    const targetKey = accessLevel === 'admin' ? 'dtconsult' : accessLevel;
-    for (const file of Array.from(files)) {
-      const filePath = `${targetKey}/${Date.now()}_${file.name}`;
-      const { data: storageData } = await supabase.storage.from('conglomerate-vault').upload(filePath, file);
-      if (storageData) {
-        const { data: { publicUrl } } = supabase.storage.from('conglomerate-vault').getPublicUrl(filePath);
-        await supabase.from('assets').insert([{
-          name: file.name, url: publicUrl, company_key: targetKey,
-          type: file.type.includes('html') ? 'website' : file.type.split('/')[0]
-        }]);
-      }
-    }
-    fetchVault(targetKey);
-    setIsSyncing(false);
-  };
-
-  useEffect(() => { if (accessLevel !== 'guest') fetchVault(accessLevel); }, [accessLevel]);
-
-  // --- LOGIN UI ---
-  if (accessLevel === 'guest') {
-    return (
-      <div style={{ height: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ padding: '70px', border: '1px solid #D4AF37', background: 'radial-gradient(circle, #1a0000 0%, #000 100%)', textAlign: 'center', boxShadow: '0 0 80px rgba(212,175,55,0.15)' }}>
-          <h1 style={{ color: '#D4AF37', letterSpacing: '15px', fontSize: '1.2rem', marginBottom: '40px' }}>DREAMTEAM GLOBAL</h1>
-          <input type="password" placeholder="ENTER ACCESS IDENTIFIER" value={passkey} onChange={(e)=>setPasskey(e.target.value.toUpperCase())} style={{ background: 'transparent', borderBottom: '1px solid #D4AF37', borderTop:'none', borderLeft:'none', borderRight:'none', color: 'white', padding: '15px', width: '320px', textAlign: 'center', outline: 'none', letterSpacing: '4px' }} />
-          <button onClick={() => COMPANY_KEYS[passkey] ? setAccessLevel(COMPANY_KEYS[passkey]) : alert("INVALID KEY")} style={{ display: 'block', margin: '50px auto 0', background: '#D4AF37', color: 'black', padding: '15px 70px', fontWeight: '800', cursor: 'pointer', border: 'none', letterSpacing: '3px' }}>AUTHENTICATE</button>
-        </div>
-      </div>
-    );
-  }
+  const [activeHouse, setActiveHouse] = useState('BALAJI');
+  const [isAshantiLoading, setIsAshantiLoading] = useState(false);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: theme.color, transition: 'background 1.2s cubic-bezier(0.4, 0, 0.2, 1)', color: 'white', overflow: 'hidden' }}>
+    <div className="flex h-screen w-full overflow-hidden text-white font-sans" style={{ backgroundColor: HOUSES[activeHouse].color }}>
       
-      {/* 1. FLOATING NAVIGATION BAR */}
-      <nav style={{ width: '85px', background: 'rgba(0,0,0,0.9)', borderRight: `1px solid ${theme.accent}44`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px 0', gap: '25px', zIndex: 1000 }}>
-        <div style={{ color: theme.accent, fontWeight: '900', fontSize: '1.4rem', marginBottom: '30px', textShadow: `0 0 10px ${theme.accent}66` }}>DT</div>
-        {Object.keys(COMPANY_KEYS).map(key => (
-          <div key={key} style={{ position: 'relative' }} onMouseEnter={() => setHoveredKey(key)} onMouseLeave={() => setHoveredKey(null)}>
-            <button 
-              onClick={() => {setAccessLevel(COMPANY_KEYS[key]); setActiveFile(null);}} 
-              style={{ width: '52px', height: '52px', background: accessLevel === COMPANY_KEYS[key] ? theme.accent : 'transparent', color: accessLevel === COMPANY_KEYS[key] ? 'black' : theme.accent, border: `1px solid ${theme.accent}`, borderRadius: '2px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold', transition: '0.4s' }}
-            >
-              {key.substring(0,4)}
-            </button>
-            {hoveredKey === key && (
-              <div style={{ position: 'absolute', left: '75px', top: '50%', transform: 'translateY(-50%)', background: theme.accent, color: 'black', padding: '10px 20px', fontSize: '11px', fontWeight: '900', whiteSpace: 'nowrap', boxShadow: '15px 0 30px rgba(0,0,0,0.6)', zIndex: 1100, letterSpacing: '2px' }}>
-                <div style={{ position: 'absolute', left: '-6px', top: '50%', transform: 'translateY(-50%)', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderRight: `6px solid ${theme.accent}` }}></div>
-                {HOUSES[key].name}
-              </div>
-            )}
-          </div>
+      {/* SIDE NAVIGATION */}
+      <nav className="w-24 border-r border-white/10 flex flex-col items-center py-10 gap-8 bg-black/60 backdrop-blur-xl">
+        <div className="mb-10 opacity-40 text-[10px] tracking-[4px] uppercase rotate-90 whitespace-nowrap">Systems Hub</div>
+        
+        {Object.entries(HOUSES).map(([id, data]) => (
+          <button 
+            key={id}
+            onClick={() => {
+              setActiveHouse(id);
+              setIsAshantiLoading(false);
+            }}
+            className={`w-14 h-14 flex items-center justify-center text-xl font-bold transition-all duration-500 border
+              ${activeHouse === id 
+                ? 'border-[#D4AF37] bg-[#D4AF37] text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' 
+                : 'border-white/10 text-[#D4AF37] hover:border-white/40'}`}
+          >
+            {data.logo}
+          </button>
         ))}
-        <button onClick={() => setAccessLevel('guest')} style={{ marginTop: 'auto', color: '#444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', letterSpacing: '2px' }}>LOGOUT</button>
       </nav>
 
-      {/* 2. DYNAMIC ASSET ASIDE */}
-      <aside style={{ width: '400px', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(15px)', borderRight: `1px solid ${theme.accent}22`, padding: '40px', display: 'flex', flexDirection: 'column' }}>
-        <input type="text" placeholder="GLOBAL ECOSYSTEM SEARCH..." value={searchQuery} onChange={(e) => handleGlobalSearch(e.target.value)} style={{ width: '100%', background: 'transparent', border: `1px solid ${theme.accent}44`, color: 'white', padding: '18px', marginBottom: '40px', fontSize: '11px', outline: 'none', letterSpacing: '2px' }} />
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 relative flex flex-col items-center justify-center p-20">
+        <div className="absolute top-10 right-10 text-right">
+          <div className="text-[10px] tracking-[5px] text-[#D4AF37] opacity-60 uppercase">Nairobi HQ Terminal</div>
+          <div className="text-xs font-mono opacity-40">ENCRYPTION: AES-256 ACTIVE</div>
+        </div>
+
+        <div className="text-center space-y-6">
+          <h2 className="text-[#D4AF37] tracking-[15px] text-sm uppercase opacity-70 animate-pulse">
+            {HOUSES[activeHouse].tagline}
+          </h2>
+          <h1 className="text-7xl font-light tracking-[25px] uppercase transition-all duration-1000">
+            {HOUSES[activeHouse].name}
+          </h1>
+        </div>
         
-        <div style={{ borderBottom: `1px solid ${theme.accent}22`, paddingBottom: '15px', marginBottom: '25px' }}>
-            <h2 style={{ color: theme.accent, letterSpacing: '5px', fontSize: '0.9rem', margin: 0 }}>{theme.name}</h2>
-            <p style={{ color: theme.secondary, fontSize: '0.6rem', letterSpacing: '3px', marginTop: '5px' }}>OFFICIAL CLOUD VAULT</p>
+        <div className="mt-20">
+          <button 
+            onClick={() => setIsAshantiLoading(true)}
+            className="group relative px-16 py-6 border border-[#D4AF37] text-[#D4AF37] overflow-hidden transition-all hover:text-black hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]"
+          >
+            <span className="relative z-10 tracking-[8px] text-xs font-bold">INITIALIZE ASHANTI AI</span>
+            <div className="absolute inset-0 bg-[#D4AF37] translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+          </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {vaultFiles.map(file => (
-            <div key={file.id} onClick={() => setActiveFile(file)} style={{ padding: '20px', background: activeFile?.id === file.id ? `${theme.accent}11` : 'transparent', marginBottom: '8px', borderLeft: activeFile?.id === file.id ? `3px solid ${theme.accent}` : '3px solid transparent', cursor: 'pointer', transition: '0.3s' }}>
-              <p style={{ fontSize: '11px', color: activeFile?.id === file.id ? theme.accent : '#888', margin: 0, letterSpacing: '1px' }}>{file.name.toUpperCase()}</p>
-            </div>
-          ))}
-        </div>
-
-        <label style={{ marginTop: '30px', padding: '20px', textAlign: 'center', border: `1px dashed ${theme.accent}66`, color: theme.accent, cursor: 'pointer', fontSize: '11px', letterSpacing: '3px', transition: '0.3s' }}>
-          {isSyncing ? "SYNCING TO CLOUD..." : "+ VAULT NEW ASSET"}
-          <input type="file" multiple onChange={syncToCloud} style={{ display: 'none' }} />
-        </label>
-      </aside>
-
-      {/* 3. THE 4K VIEWPORT STAGE */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-        <div style={{ height: '65%', background: '#000', borderBottom: `1px solid ${theme.accent}33` }}>
-          {activeFile ? (
-            <iframe src={activeFile.url} style={{ width: '100%', height: '100%', border: 'none', background: 'white' }} />
-          ) : (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `radial-gradient(circle at center, ${theme.color} 0%, #000 100%)` }}>
-              <div style={{ textAlign: 'center', opacity: 0.1 }}>
-                <h3 style={{ color: theme.accent, fontSize: '5rem', letterSpacing: '40px', margin: 0 }}>DREAMTEAM</h3>
-                <p style={{ color: theme.accent, fontSize: '1rem', letterSpacing: '15px', marginTop: '20px' }}>ESTABLISHED 2024</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* EMBOSSED PLATINUM/GOLD FOOTER */}
-        <div style={{ flex: 1, padding: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%)` }}>
-           <h1 style={{ 
-             fontSize: '6rem', 
-             margin: 0, 
-             color: 'transparent', 
-             WebkitTextStroke: `1px ${theme.accent}88`,
-             letterSpacing: '-3px',
-             fontWeight: '900'
-           }}>
-             {accessLevel.toUpperCase()}
-           </h1>
-           <div style={{ display: 'flex', gap: '30px', alignItems: 'center', marginTop: '-10px' }}>
-              <div style={{ height: '1px', width: '100px', background: theme.accent }}></div>
-              <p style={{ color: theme.accent, letterSpacing: '12px', fontSize: '0.9rem', fontWeight: '300' }}>INFRASTRUCTURE VERIFIED</p>
-           </div>
-        </div>
-
-        {/* ASHANTI AI SYSTEM PANEL */}
-        <div style={{ position: 'absolute', bottom: '50px', right: '50px', zIndex: 2000 }}>
-          {isAshantiOpen ? (
-            <div style={{ width: '420px', height: '650px', background: 'rgba(0,0,0,0.95)', border: `1px solid ${theme.accent}`, display: 'flex', flexDirection: 'column', boxShadow: `0 0 60px ${theme.accent}22`, backdropFilter: 'blur(20px)' }}>
-              <div style={{ background: theme.accent, color: 'black', padding: '25px', fontWeight: '900', display: 'flex', justifyContent: 'space-between', letterSpacing: '3px', fontSize: '12px' }}>
-                ASHANTI ASSISTANT // {currentHouseKey}
-                <button onClick={()=>setIsAshantiOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: '900' }}>[ X ]</button>
-              </div>
-              <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
-                <p style={{ color: theme.accent, fontSize: '14px', lineHeight: '1.8', borderLeft: `2px solid ${theme.accent}`, paddingLeft: '20px' }}>
-                  Ashanti: I have shifted the architecture to the {theme.name} profile. All protocols are active. How shall we govern the assets today?
-                </p>
-              </div>
-              <div style={{ padding: '30px', borderTop: `1px solid ${theme.accent}22` }}>
-                <input placeholder="ENTER COMMAND..." style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: `1px solid ${theme.accent}44`, color: 'white', padding: '15px', outline: 'none', letterSpacing: '2px', fontSize: '11px' }} />
-              </div>
-            </div>
-          ) : (
-            <button onClick={()=>setIsAshantiOpen(true)} style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#000', border: `2px solid ${theme.accent}`, color: theme.accent, fontSize: '28px', fontWeight: '900', cursor: 'pointer', boxShadow: `0 0 30px ${theme.accent}44`, transition: '0.3s' }}>A</button>
-          )}
-        </div>
+        {/* ASHANTI AI INTERFACE OVERLAY */}
+        {isAshantiLoading && (
+          <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-10 backdrop-blur-3xl">
+             <div className="relative w-full max-w-6xl aspect-video border border-[#D4AF37]/30 bg-zinc-950 shadow-[0_0_100px_rgba(0,0,0,1)]">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-6">
+                    <div className="w-20 h-20 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="tracking-[6px] text-[10px] text-[#D4AF37] uppercase">Syncing 8K Stream from {activeHouse} Vault...</p>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={() => setIsAshantiLoading(false)}
+                  className="absolute -top-12 right-0 text-white/40 hover:text-[#D4AF37] tracking-[3px] text-[10px] transition-colors"
+                >
+                  [ DISCONNECT TERMINAL ]
+                </button>
+             </div>
+          </div>
+        )}
       </main>
     </div>
   );
